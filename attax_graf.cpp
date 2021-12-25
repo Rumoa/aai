@@ -249,7 +249,8 @@ int avalia(int jog)
 }
 
 // Movimento do Computador - Joga Aleatorio
-void jogada_PC(int jog, int n)
+// Why is it random??
+void jogada_PC(int jog)//, int n)
 {
 	movimento mov = {0, 0, 0, 0, jog, 0}, bestmov;
 	int bestav = -1000;
@@ -403,14 +404,14 @@ void jogada(int n, int jog, int tJog)
 		if (tJog <= 2)
 			jogada_Humano(jog);
 		else
-			jogada_PC(jog, n);
+			jogada_PC(jog);//, n);
 	}
 	else
 	{
 		if (tJog == 1 || tJog == 3)
 			jogada_Humano(jog);
 		else
-			jogada_PC(jog, n);
+			jogada_PC(jog);//, n);
 	}
 }
 
