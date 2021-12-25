@@ -250,10 +250,15 @@ int avalia(int jog)
 
 // Movimento do Computador - Joga Aleatorio
 // Why is it random??
-void jogada_PC(int jog)//, int n)
+
+
+
+
+void jogada_PC_temp(int jog, )//, int bestav, struct movimento bestmov)//, int n)
 {
 	movimento mov = {0, 0, 0, 0, jog, 0}, bestmov;
 	int bestav = -1000;
+	// This is the search of the best movement given a certain state
 	for (int yi = 0; yi < N; yi++)
 		for (int xi = 0; xi < N; xi++)
 			for (int yf = 0; yf < N; yf++)
@@ -279,6 +284,63 @@ void jogada_PC(int jog)//, int n)
 				}
 	executa_movimento(bestmov);
 }
+
+
+void jogada_PC(int jog, struct movimento bestmov)//, int n)
+{
+	movimento mov = {0, 0, 0, 0, jog, 0}, bestmov;
+	int bestav = -1000;
+	// This is the search of the best movement given a certain state
+	for (int yi = 0; yi < N; yi++)
+		for (int xi = 0; xi < N; xi++)
+			for (int yf = 0; yf < N; yf++)
+				for (int xf = 0; xf < N; xf++) /* recorre todas las posibles jugadas */
+				{
+					mov.yi = yi;
+					mov.xi = xi;
+					mov.yf = yf;
+					mov.xf = xf;
+					if (movimento_valido(mov)) /* comprueba si el mov es valido */
+					{
+						copia();
+						executa_movimento(mov);
+						int av = avalia(jog); /* calcula la ventaja */
+						if (av >= bestav)
+						{
+							bestav = av;
+							bestmov = mov;
+						}
+						printf("%d %d -> %d %d (%d): %d \n", mov.yi, mov.xi, mov.yf, mov.xf, mov.tipo, av);
+						restaura();
+					}
+				}
+	executa_movimento(bestmov);
+}
+
+void jogada_PC_minimax(int jog, int minimax_depth)//, int n)
+{
+	movimento mov = {0, 0, 0, 0, jog, 0}, bestmov, temp_mov;
+	int bestav = -1000; // anteriormente -1000
+	int temp_jog = jog;
+	int temp_av = 0;
+	int sum_av = 0;
+	// This is the search of the best movement given a certain state
+	copia();
+	for (int i_minimax=0; i_minimax<minimax_depth; i_minimax++){
+		printf("i minimax %i \n", i_minimax);
+		// juegapc con jugador jog
+		jogada_PC(temp_jog);
+		// devuelve la jugada con la avalia
+		// suma la avalia para el jugador jog
+		// cambia de jogador
+		temp_jog++;
+		
+
+
+	}
+	restaura();
+	executa_movimento(bestmov);
+}	
 
 // Determina todas as jogadas validas de um jogador
 int jogadas_validas(int jog, movimento movs[], int tipoAss)
@@ -397,21 +459,21 @@ void jogada_Humano(int jog)
 
 // Dependendo do modo de jogo e do numero da jogada
 // pede uma jogada ao humano ou calcula uma jogada para o PC
-void jogada(int n, int jog, int tJog)
+void jogada(int n, int jog, int tJog, int minimax_depth)
 {
 	if (n % 2 == 1)
 	{
 		if (tJog <= 2)
 			jogada_Humano(jog);
 		else
-			jogada_PC(jog);//, n);
+			jogada_PC_minimax(jog, minimax_depth);//, n);
 	}
 	else
 	{
 		if (tJog == 1 || tJog == 3)
 			jogada_Humano(jog);
 		else
-			jogada_PC(jog);//, n);
+			jogada_PC_minimax(jog, minimax_depth);//, n);
 	}
 }
 
@@ -419,6 +481,7 @@ void jogada(int n, int jog, int tJog)
 int main(void)
 {
 	int fim = -1, jog = 0, tipo = tipo_jogo();
+	int minimax_depth = 2;
 	printf("tipo de jogo %d", tipo);
 	srand(time(NULL));
 	initwindow(SIZE + 8, SIZE + 11); // cria a janela grafica
@@ -429,7 +492,7 @@ int main(void)
 		jog = outroJog(jog); // incrementa jogada e troca de jogador
 		printf("Attax Jogada No: %d  Jogador: %d, Aval: %d\n", nMovs, jog, avalia(jog));
 		mostra_tabul();			  // mostra o tabuleiro no ecran
-		jogada(nMovs, jog, tipo); // executa jogada Humano/PC
+		jogada(nMovs, jog, tipo, minimax_depth); // executa jogada Humano/PC
 		fim = fim_jogo(jog);	  // verifica se o jogo acabou
 		delay(100);
 	} while (fim == -1);
